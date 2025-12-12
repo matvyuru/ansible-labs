@@ -1,0 +1,54 @@
+---
+- name: Часть 1 - Основные задания Ansible
+  hosts: managed_nodes
+  become: yes
+  
+  tasks:
+    - name: 1. Создание тестового файла
+      file:
+        path: /tmp/ansible_test.txt
+        state: touch
+        mode: '0644'
+    
+    - name: 2. Установка системных утилит
+      apt:
+        name:
+          - curl
+          - wget
+          - htop
+        state: present
+        update_cache: yes
+    
+    - name: 3. Создание пользователя
+      user:
+        name: ansible-user
+        shell: /bin/bash
+        create_home: yes
+    
+    - name: 4. Сбор фактов
+      setup:
+        gather_subset: min
+      register: facts
+    
+    - name: 5. Сохранение фактов
+      copy:
+        content: "{{ facts | to_nice_yaml }}"
+        dest: /tmp/ansible_facts.yaml
+    
+    - name: 6. Установка и настройка NGINX (с handler)
+      apt:
+        name: nginx
+        state: present
+      notify: restart nginx
+    
+    - name: 7. Создание веб-страницы
+      copy:
+        content: "<h1>Ansible Lab</h1><p>Работа завершена</p>"
+        dest: /var/www/html/index.html
+      notify: restart nginx
+  
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

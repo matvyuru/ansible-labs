@@ -1,0 +1,23 @@
+---
+- name: Тестирование кастомных модулей
+  hosts: managed_nodes
+  gather_facts: no
+  
+  tasks:
+    - name: Тест модуля информации
+      custom_info:
+        student_name: "Иванов И.И."
+        lab_number: 1
+      register: info_result
+    
+    - name: Вывод результата
+      debug:
+        var: info_result
+    
+    - name: Тест модуля фактов
+      custom_facts:
+      register: facts_result
+    
+    - name: Вывод кастомных фактов
+      debug:
+        var: ansible_facts.lab_facts
