@@ -1,0 +1,10 @@
+---
+- name: Применение роли NGINX
+  hosts: managed_nodes
+  become: yes
+  
+  vars:
+    student_name: "Ваше Имя"
+  
+  roles:
+    - nginx
