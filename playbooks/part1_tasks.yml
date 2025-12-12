@@ -1,0 +1,63 @@
+---
+- name: Выполнение лабораторной работы - Часть 1
+  hosts: managed_nodes
+  become: yes
+  
+  tasks:
+    # Задание 4: 3 ручные операции
+    - name: 4.1 - Создание тестового файла
+      file:
+        path: /tmp/lab_test.txt
+        state: touch
+        mode: '0644'
+    
+    - name: 4.2 - Установка дополнительного пакета
+      apt:
+        name: htop
+        state: present
+        update_cache: yes
+    
+    - name: 4.3 - Создание пользователя для Ansible
+      user:
+        name: ansible-lab-user
+        shell: /bin/bash
+        groups: sudo
+        append: yes
+    
+    # Задание 5: Сбор фактов
+    - name: 5 - Сохранение фактов в файл
+      setup:
+      register: facts_output
+    
+    - name: 5 - Запись фактов в файл
+      copy:
+        content: "{{ facts_output | to_nice_yaml }}"
+        dest: /tmp/ansible_facts.yaml
+        mode: '0644'
+    
+    # Задание 6: Использование Handler
+    - name: 6.1 - Установка Nginx (с handler)
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+      notify: restart nginx
+    
+    - name: 6.2 - Настройка начальной страницы
+      copy:
+        content: |
+          <html>
+            <body>
+              <h1>Ansible Lab - Handler Test</h1>
+              <p>Страница создана через handler</p>
+            </body>
+          </html>
+        dest: /var/www/html/index.nginx-debian.html
+        mode: '0644'
+      notify: restart nginx
+  
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
